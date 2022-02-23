@@ -25,5 +25,4 @@ class CdkPipelineStack(Stack):
                     "cdk synth"
                 ]
             ),
-            self_mutation=True,
         )
