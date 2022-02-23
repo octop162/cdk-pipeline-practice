@@ -24,5 +24,6 @@ class CdkPipelineStack(Stack):
                     "npm install -g aws-cdk",
                     "cdk synth"
                 ]
-            )
+            ),
+            self_mutation=True,
         )
