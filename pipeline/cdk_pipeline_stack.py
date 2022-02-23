@@ -1,18 +1,35 @@
 from aws_cdk import (
-    # Duration,
-    Stack,
-    # aws_sqs as sqs,
     pipelines,
+    aws_lambda as lambda_,
+    Stack,
+    Stage,
+    CfnOutput,
 )
 from constructs import Construct
 
-
-class CdkPipelineStack(Stack):
+class CdkLambdaStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        pipelines.CodePipeline(self, "Pipeline",
+        lambda_.Function(
+            self,
+            "MyLambda",
+            code=lambda_.Code.from_asset("mylambda"),
+            handler='index.main',
+            runtime=lambda_.Runtime.PYTHON_3_9,
+        )
+class MyOutputStage(Stage):
+    def __init__(self, scope, id, *, env=None, outdir=None):
+        super().__init__(scope, id, env=env, outdir=outdir)
+        CdkLambdaStack(self, "CdkLambda")
+
+    
+class CdkPipelineStack(Stack):
+    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+        super().__init__(scope, construct_id, **kwargs)
+
+        pipeline = pipelines.CodePipeline(self, "Pipeline",
             synth=pipelines.ShellStep("Synth",
                 input=pipelines.CodePipelineSource.connection(
                     'octop162/cdk-pipeline-practice',
@@ -25,4 +42,13 @@ class CdkPipelineStack(Stack):
                     "cdk synth"
                 ]
             ),
+            pipeline_name='CDKPipeline',
+            self_mutation=True,
+        )
+        stage = MyOutputStage(self, 'MyOutputStage')
+        pipeline.add_stage(
+            stage,
+            pre=[
+                pipelines.ManualApprovalStep("PremoteToPred")
+            ],
         )
