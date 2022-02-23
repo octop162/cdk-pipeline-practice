@@ -19,7 +19,7 @@ class CdkPipelineStack(Stack):
                     'main',
                     connection_arn='arn:aws:codestar-connections:ap-northeast-1:595135303684:connection/42c46967-2a5a-45d7-9b0c-1e50bc2a6101'
                 ),
-                commands=["echo Hello"]
+                commands=["cdk ls"]
             )
         )
 
